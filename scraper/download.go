@@ -14,19 +14,12 @@ import (
 type assetProcessor func(URL *url.URL, buf *bytes.Buffer) *bytes.Buffer
 
 func (s *Scraper) downloadReferences() {
-	for _, image := range s.browser.Images() {
-		s.imagesQueue = append(s.imagesQueue, &image.DownloadableAsset)
-	}
 	for _, stylesheet := range s.browser.Stylesheets() {
-		s.downloadAsset(&stylesheet.DownloadableAsset, s.checkCSSForUrls)
+		go s.downloadAsset(&stylesheet.DownloadableAsset, s.checkCSSForUrls)
 	}
 	for _, script := range s.browser.Scripts() {
-		s.downloadAsset(&script.DownloadableAsset, nil)
+		go s.downloadAsset(&script.DownloadableAsset, nil)
 	}
-	for _, image := range s.imagesQueue {
-		s.downloadAsset(image, s.checkImageForRecode)
-	}
-	s.imagesQueue = nil
 }
 
 // downloadAsset downloads an asset if it does not exist on disk yet.
